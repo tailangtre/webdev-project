@@ -1,63 +1,80 @@
-let database = require("../database");
+const { db } = require("../prisma/database");
 
 let remindersController = {
-  list: (req, res) => {
-    res.render("reminder/index", { reminders: database.cindy.reminders });
+  list: async(req, res) => {
+    let reminders = await db.reminder.findMany(
+      {
+        where: {
+          userId: req.user.id
+        }
+      }
+    );
+    res.render("reminder/index", { reminders: reminders });
   },
 
   new: (req, res) => {
     res.render("reminder/create");
   },
 
-  listOne: (req, res) => {
-    let reminderToFind = req.params.id;
-    let searchResult = database.cindy.reminders.find(function (reminder) {
-      return reminder.id == reminderToFind;
-    });
+  listOne: async (req, res) => {
+    let reminderToFind = parseInt(req.params.id);
+    let searchResult = await db.reminder.findUnique({
+      where: {
+        id: reminderToFind
+      }
+    })
     if (searchResult != undefined) {
       res.render("reminder/single-reminder", { reminderItem: searchResult });
     } else {
-      res.render("reminder/index", { reminders: database.cindy.reminders });
+      this.list();
     }
   },
 
-  create: (req, res) => {
+  create: async (req, res) => {
     let reminder = {
-      id: database.cindy.reminders.length + 1,
       title: req.body.title,
       description: req.body.description,
       completed: "false",
+      userId: req.user.id
     };
-    database.cindy.reminders.push(reminder);
+    await db.reminder.create(
+      {data: reminder}
+    );
     res.redirect("/reminders");
   },
 
-  edit: (req, res) => {
-    let reminderToFind = req.params.id;
-    let searchResult = database.cindy.reminders.find(function (reminder) {
-      return reminder.id == reminderToFind;
+  edit: async (req, res) => {
+    let reminderToFind = parseInt(req.params.id);
+    let searchResult = await db.reminder.findUnique({
+      where: {
+        id: reminderToFind
+      }
     });
     res.render("reminder/edit", { reminderItem: searchResult });
   },
 
-  update: (req, res) => {
+  update: async (req, res) => {
     // implement this code
-    findReminder = database.cindy.reminders.find(function (reminder) {
-      return reminder.id == req.params.id;
-    });
-    findReminder.title = req.body.title;
-    findReminder.description = req.body.description;
-    findReminder.completed = req.body.completed;
-    console.log(findReminder);
-    res.redirect("/reminder/" + findReminder.id);
+    await db.reminder.update({
+      where: {
+        id: parseInt(req.params.id)
+      },
+      data: {
+        title: req.body.title,
+        description: req.body.description,
+        completed: req.body.completed
+      }
+    })
+    res.redirect("/reminder/" + req.params.id);
   },
 
-  delete: (req, res) => {
+  delete: async (req, res) => {
     // Implement this code
-    findReminder = database.cindy.reminders.find(function (reminder) {
-      return reminder.id == req.params.id;
-    });
-    database.cindy.reminders.splice(database.cindy.reminders.indexOf(findReminder), 1);
+    await db.reminder.delete({
+      where: {
+        id: parseInt(req.params.id)
+      }
+    })
     res.redirect("/reminders");
   },
 };

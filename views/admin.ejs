@@ -1,0 +1,9 @@
+
+<h1 class="mt-4">Dashboard</h1>
+
+<p>Current active sessions</p>
+<% blocks.forEach((block) => { %>
+    <p>User ID: <%= block.userId %></p>
+    <p>Session ID: <%= block.sessionId %></p>
+    <a href="/admin/revoke/<%= block.sessionId %>">Revoke Session</a>
+<% }); %>

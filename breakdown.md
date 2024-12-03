@@ -7,7 +7,11 @@ I worked on the following tasks:
 Nov 25th, 2024
 Tom Tran:
 I worked on the following tasks:
-1. Add signup feature
-2. Add login feature
+1. Add authentication feature for users
+2. Add admin route and view
+3. Enable admins to destroy sessions
 
 Dec 2nd, 2024
+Tom Tran:
+I worked on the following tasks:
+1. Integrate real database using Prisma

@@ -1,21 +1,45 @@
-let database = require("../database");
+const { db } = require("../prisma/database");
+const passport = require("../middleware/passport");
+
 
 let authController = {
   login: (req, res) => {
-    res.render("auth/login");
+    res.render("auth/login"); 
   },
 
   register: (req, res) => {
     res.render("auth/register");
   },
 
-  loginSubmit: (req, res) => {
-    // implement
+  revoke: async (req, res) => {
+    const sessionId = req.params.id;
+    req.sessionStore.destroy(sessionId, (err) => {
+      res.redirect('/admin'); 
+    });
   },
-
-  registerSubmit: (req, res) => {
+  
+  admin: (req, res) => {
+    const sessions = req.sessionStore.sessions; 
+    const users = Object.keys(sessions).map((sessionId) => {
+      return {
+        sessionId,
+        userId: JSON.parse(sessions[sessionId]).passport.user, 
+      };
+    });
+    res.render("admin", {blocks: users} );
+  },
+  registerSubmit: async (req, res) => {
     // implement
+    let user = {
+      email: req.body.email,
+      password: req.body.password,
+    }
+    await db.user.create({
+      data: user
+    })
+
+    res.redirect("/login");
   },
 };
 
-module.exports = authController;
+module.exports = { authController, db };
